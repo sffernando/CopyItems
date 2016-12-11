@@ -21,7 +21,7 @@ public protocol Resource {
  
  When passed to image view set methods, Kinfisher will try to dowload the target image from the `downloadURL`, and then store it with the `cacheKey` as the key in cache
  */
-public struct ImageSource: Resource {
+public struct ImageResource: Resource {
     /// The key used in cache
     public let cacheKey: String
     /// The target image URL
