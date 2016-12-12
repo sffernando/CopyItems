@@ -116,6 +116,32 @@ YYEncodingType YYEncodingGetType(const char *typeEncoding);
 - (instancetype)initWithMethod:(Method)method;
 @end
 
+
+
+/**
+ Property information
+ */
+@interface YYClassPropertyInfo : NSObject
+@property (nonatomic, assign, readonly) objc_property_t property; ///< property's opaque struct
+@property (nonatomic, strong, readonly) NSString *name;           ///< property's name
+@property (nonatomic, assign, readonly) YYEncodingType type;      ///< property's type
+@property (nonatomic, strong, readonly) NSString *typeEncoding;   ///< property's encoding value
+@property (nonatomic, strong, readonly) NSString *ivarName;       ///< property's ivar name
+@property (nullable, nonatomic, assign, readonly) Class cls;      ///< may be nil
+@property (nullable, nonatomic, strong, readonly) NSArray<NSString *> *protocols; ///< may nil
+@property (nonatomic, assign, readonly) SEL getter;               ///< getter (nonnull)
+@property (nonatomic, assign, readonly) SEL setter;               ///< setter (nonnull)
+
+
+/**
+ Creates and returns a property info object.
+
+ @param property property opaque struct
+ @return A new object, or nil if an error occurs.
+ */
+- (instancetype)initWithProperty:(objc_property_t)property;
+@end
+
 @interface YYClassInfo : NSObject
 
 @end

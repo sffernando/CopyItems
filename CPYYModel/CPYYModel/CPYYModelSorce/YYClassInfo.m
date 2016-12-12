@@ -149,6 +149,108 @@ YYEncodingType YYEncodingGetType(const char *typeEncoding) {
 
 @end
 
+@implementation YYClassPropertyInfo
+
+- (instancetype)initWithProperty:(objc_property_t)property {
+    if (!property) return nil;
+    self = [super init];
+    _property = property;
+    const char *name = property_getName(property);
+    if (name) {
+        _name = [NSString stringWithUTF8String:name];
+    }
+    
+    YYEncodingType type = 0;
+    unsigned int attrCount;
+    objc_property_attribute_t *attrs = property_copyAttributeList(property, &attrCount);
+    for (unsigned int i = 0; i < attrCount; i++) {
+        switch (attrs[i].name[0]) {
+            case 'T': { // Type encoding
+                if (attrs[i].value) {
+                    _typeEncoding = [NSString stringWithUTF8String:attrs[i].value];
+                    type = YYEncodingGetType(attrs[i].value);
+                    
+                    if ((type & YYEncodingTypeMask) == YYEncodingTypeObject && _typeEncoding.length) {
+                        NSScanner *scanner = [NSScanner scannerWithString:_typeEncoding];
+                        if (![scanner scanString:@"@\"" intoString:NULL]) continue;
+                        
+                        NSString *clsName = nil;
+                        if ([scanner scanUpToCharactersFromSet: [NSCharacterSet characterSetWithCharactersInString:@"\"<"] intoString:&clsName]) {
+                            if (clsName.length) _cls = objc_getClass(clsName.UTF8String);
+                        }
+                        
+                        NSMutableArray *protocols = nil;
+                        while ([scanner scanString:@"<" intoString:NULL]) {
+                            NSString* protocol = nil;
+                            if ([scanner scanUpToString:@">" intoString: &protocol]) {
+                                if (protocol.length) {
+                                    if (!protocols) protocols = [NSMutableArray new];
+                                    [protocols addObject:protocol];
+                                }
+                            }
+                            [scanner scanString:@">" intoString:NULL];
+                        }
+                        _protocols = protocols;
+                    }
+                }
+            } break;
+            case 'V': { // Instance variable
+                if (attrs[i].value) {
+                    _ivarName = [NSString stringWithUTF8String:attrs[i].value];
+                }
+            } break;
+            case 'R': {
+                type |= YYEncodingTypePropertyReadonly;
+            } break;
+            case 'C': {
+                type |= YYEncodingTypePropertyCopy;
+            } break;
+            case '&': {
+                type |= YYEncodingTypePropertyRetain;
+            } break;
+            case 'N': {
+                type |= YYEncodingTypePropertyNonatomic;
+            } break;
+            case 'D': {
+                type |= YYEncodingTypePropertyDynamic;
+            } break;
+            case 'W': {
+                type |= YYEncodingTypePropertyWeak;
+            } break;
+            case 'G': {
+                type |= YYEncodingTypePropertyCustomGetter;
+                if (attrs[i].value) {
+                    _getter = NSSelectorFromString([NSString stringWithUTF8String:attrs[i].value]);
+                }
+            } break;
+            case 'S': {
+                type |= YYEncodingTypePropertyCustomSetter;
+                if (attrs[i].value) {
+                    _setter = NSSelectorFromString([NSString stringWithUTF8String:attrs[i].value]);
+                }
+            } // break; commented for code coverage in next line
+            default: break;
+        }
+    }
+    if (attrs) {
+        free(attrs);
+        attrs = NULL;
+    }
+    
+    _type = type;
+    if (_name.length) {
+        if (!_getter) {
+            _getter = NSSelectorFromString(_name);
+        }
+        if (!_setter) {
+            _setter = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:", [_name substringToIndex:1].uppercaseString, [_name substringFromIndex:1]]);
+        }
+    }
+    return self;
+}
+
+@end
+
 @implementation YYClassInfo
 
 @end
