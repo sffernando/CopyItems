@@ -321,6 +321,14 @@ extension KingFisher where Base: Image {
 }
 
 /// Reference the source image reference
+//class ImageSource {
+//    var imageRef: CGImageSource?
+//    init(ref: CGImageSource) {
+//        self.imageRef = ref
+//    }
+//}
+
+// Reference the source image reference
 class ImageSource {
     var imageRef: CGImageSource?
     init(ref: CGImageSource) {
@@ -328,6 +336,20 @@ class ImageSource {
     }
 }
 
+//extension CGBitmapInfo {
+//    var fixed: CGBitmapInfo {
+//        var fixed = self
+//        let alpha = (rawValue & CGBitmapInfo.alphaInfoMask.rawValue)
+//        if alpha == CGImageAlphaInfo.none.rawValue {
+//            fixed.remove(.alphaInfoMask)
+//            fixed = CGBitmapInfo(rawValue: fixed.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+//        } else if !(alpha == CGImageAlphaInfo.noneSkipFirst.rawValue) || !(alpha == CGImageAlphaInfo.noneSkipLast.rawValue) {
+//            fixed.remove(.alphaInfoMask)
+//            fixed = CGBitmapInfo(rawValue: fixed.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
+//        }
+//        return fixed
+//    }
+//}
 extension CGBitmapInfo {
     var fixed: CGBitmapInfo {
         var fixed = self
@@ -343,61 +365,141 @@ extension CGBitmapInfo {
     }
 }
 
+//extension KingFisher where Base: Image {
+//    
+//    func draw(cgImage: CGImage?, to size: CGSize, draw: ()->()) -> Image {
+//        #if os(macOS)
+//            guard let rep = NSBitmapImageRep(
+//                bitmapDataPlanes: nil,
+//                pixelsWide: Int(size.width),
+//                pixelsHigh: Int(size.height),
+//                bitsPerSample: cgImage?.bitsPerComponent ?? 8,
+//                samplesPerPixel: 4,
+//                hasAlpha: true,
+//                isPlanar: false,
+//                colorSpaceName: NSCalibratedRGBColorSpace,
+//                bytesPerRow: 0,
+//                bitsPerPixel: 0) else
+//            {
+//                assertionFailure("[Kingfisher] Image representation cannot be created.")
+//                return base
+//            }
+//            rep.size = size
+//            
+//            NSGraphicsContext.saveGraphicsState()
+//            
+//            let context = NSGraphicsContext(bitmapImageRep: rep)
+//            NSGraphicsContext.setCurrent(context)
+//            draw()
+//            NSGraphicsContext.restoreGraphicsState()
+//            
+//            let outputImage = Image(size: size)
+//            outputImage.addRepresentation(rep)
+//            return outputImage
+//        #else
+//            
+//            UIGraphicsBeginImageContextWithOptions(size, false, scale)
+//            defer { UIGraphicsEndImageContext() }
+//            draw()
+//            return UIGraphicsGetImageFromCurrentImageContext() ?? base
+//            
+//        #endif
+//    }
+//    
+//    #if os(macOS)
+//    func fixedForRetinaPixel(cgImage: CGImage, to size: CGSize) -> Image {
+//    
+//    let image = Image(cgImage: cgImage, size: base.size)
+//    let rect = CGRect(origin: CGPoint(x: 0, y: 0), size: size)
+//    
+//    return draw(cgImage: cgImage, to: self.size) {
+//    image.draw(in: rect, from: NSRect.zero, operation: .copy, fraction: 1.0)
+//    }
+//    }
+//    #endif
+//}
 
 extension KingFisher where Base: Image {
     
     func draw(cgImage: CGImage?, to size: CGSize, draw: ()->()) -> Image {
         #if os(macOS)
-            guard let rep = NSBitmapImageRep(
-                bitmapDataPlanes: nil,
-                pixelsWide: Int(size.width),
-                pixelsHigh: Int(size.height),
-                bitsPerSample: cgImage?.bitsPerComponent ?? 8,
-                samplesPerPixel: 4,
-                hasAlpha: true,
-                isPlanar: false,
-                colorSpaceName: NSCalibratedRGBColorSpace,
-                bytesPerRow: 0,
-                bitsPerPixel: 0) else
-            {
-                assertionFailure("[Kingfisher] Image representation cannot be created.")
-                return base
-            }
-            rep.size = size
-            
-            NSGraphicsContext.saveGraphicsState()
-            
-            let context = NSGraphicsContext(bitmapImageRep: rep)
-            NSGraphicsContext.setCurrent(context)
-            draw()
-            NSGraphicsContext.restoreGraphicsState()
-            
-            let outputImage = Image(size: size)
-            outputImage.addRepresentation(rep)
-            return outputImage
-        #else
-            
-            UIGraphicsBeginImageContextWithOptions(size, false, scale)
-            defer { UIGraphicsEndImageContext() }
-            draw()
-            return UIGraphicsGetImageFromCurrentImageContext() ?? base
-            
-        #endif
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(size.width),
+            pixelsHigh: Int(size.height),
+            bitsPerSample: cgImage?.bitsPerComponent ?? 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: NSCalibratedRGBColorSpace,
+            bytesPerRow: 0,
+            bitsPerPixel: 0) else
+        {
+            assertionFailure("[KingFisher] Image representation cannot be created.")
+        }
+        rep.size = size
+
+        NSGraphicsContext.saveGraphicsState()
+        
+        let context = NSGraphicsContext(bitmapImageRep: rep)
+        NSGraphicsContext.setCurrent(context)
+        draw()
+        NSGraphicsContext.restoreGraphicsState()
+        
+        let outputImage = Image(size: size)
+        outputImage.addRepresentation(rep)
+        return outputImage
+    #else
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        defer {
+            UIGraphicsEndImageContext()
+        }
+        draw()
+        return UIGraphicsGetImageFromCurrentImageContext() ?? base
+    #endif
     }
     
     #if os(macOS)
     func fixedForRetinaPixel(cgImage: CGImage, to size: CGSize) -> Image {
-    
-    let image = Image(cgImage: cgImage, size: base.size)
-    let rect = CGRect(origin: CGPoint(x: 0, y: 0), size: size)
-    
-    return draw(cgImage: cgImage, to: self.size) {
-    image.draw(in: rect, from: NSRect.zero, operation: .copy, fraction: 1.0)
-    }
+        
+        let image = Image(cgImage: cgImage, size: base.size)
+        let rect = CGRect(origin: CGPoint(x: 0, y: 0), size: size)
+        
+        return draw(cgImage: cgImage, to: self.size) {
+            image.draw(in: rect, from: NSRect.zero, operation: .copy, fraction: 1.0)
+        }
     }
     #endif
 }
 
+//extension CGContext {
+//    static func createARGBContext(from imageRef: CGImage) -> CGContext? {
+//        
+//        let w = imageRef.width
+//        let h = imageRef.height
+//        let bytesPerRow = w * 4
+//        let colorSpace = CGColorSpaceCreateDeviceRGB()
+//        
+//        let data = malloc(bytesPerRow * h)
+//        defer {
+//            free(data)
+//        }
+//        
+//        let bitmapInfo = imageRef.bitmapInfo.fixed
+//        
+//        // Create the bitmap context. We want pre-multiplied ARGB, 8-bits
+//        // per component. Regardless of what the source image format is
+//        // (CMYK, Grayscale, and so on) it will be converted over to the format
+//        // specified here.
+//        return CGContext(data: data,
+//                         width: w,
+//                         height: h,
+//                         bitsPerComponent: imageRef.bitsPerComponent,
+//                         bytesPerRow: bytesPerRow,
+//                         space: colorSpace,
+//                         bitmapInfo: bitmapInfo.rawValue)
+//    }
+//}
 
 extension CGContext {
     static func createARGBContext(from imageRef: CGImage) -> CGContext? {
@@ -428,11 +530,27 @@ extension CGContext {
     }
 }
 
+
+//extension Double {
+//    var isEven: Bool {
+//        return truncatingRemainder(dividingBy: 2.0) == 0
+//    }
+//}
+
 extension Double {
     var isEven: Bool {
         return truncatingRemainder(dividingBy: 2.0) == 0
     }
+    
 }
+
+// MARK: - Image format
+//private struct ImageHeaderData {
+//    static var PNG: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
+//    static var JPEG_SOI: [UInt8] = [0xFF, 0xD8]
+//    static var JPEG_IF: [UInt8] = [0xFF]
+//    static var GIF: [UInt8] = [0x47, 0x49, 0x46]
+//}
 
 // MARK: - Image format
 private struct ImageHeaderData {
@@ -442,10 +560,21 @@ private struct ImageHeaderData {
     static var GIF: [UInt8] = [0x47, 0x49, 0x46]
 }
 
+//enum ImageFormat {
+//    case unknown, PNG, JPEG, GIF
+//}
 enum ImageFormat {
     case unknown, PNG, JPEG, GIF
 }
 
+
+// MARK: - Misc Helpers
+//public struct DataProxy {
+//    fileprivate let base: Data
+//    init(proxy: Data) {
+//        base = proxy
+//    }
+//}
 
 // MARK: - Misc Helpers
 public struct DataProxy {
@@ -455,12 +584,40 @@ public struct DataProxy {
     }
 }
 
+//extension Data: KingFisherCompatible {
+//    public typealias CompatibleType = DataProxy
+//    public var kf: DataProxy {
+//        return DataProxy(proxy: self)
+//    }
+//}
 extension Data: KingFisherCompatible {
     public typealias CompatibleType = DataProxy
     public var kf: DataProxy {
         return DataProxy(proxy: self)
     }
 }
+
+//extension DataProxy {
+//    var imageFormat: ImageFormat {
+//        var buffer = [UInt8](repeating: 0, count: 8)
+//        (base as NSData).getBytes(&buffer, length: 8)
+//        if buffer == ImageHeaderData.PNG {
+//            return .PNG
+//        } else if buffer[0] == ImageHeaderData.JPEG_SOI[0] &&
+//            buffer[1] == ImageHeaderData.JPEG_SOI[1] &&
+//            buffer[2] == ImageHeaderData.JPEG_IF[0]
+//        {
+//            return .JPEG
+//        } else if buffer[0] == ImageHeaderData.GIF[0] &&
+//            buffer[1] == ImageHeaderData.GIF[1] &&
+//            buffer[2] == ImageHeaderData.GIF[2]
+//        {
+//            return .GIF
+//        }
+//        
+//        return .unknown
+//    }
+//}
 
 extension DataProxy {
     var imageFormat: ImageFormat {
@@ -483,3 +640,12 @@ extension DataProxy {
         return .unknown
     }
 }
+
+
+
+
+
+
+
+
+
