@@ -142,7 +142,59 @@ YYEncodingType YYEncodingGetType(const char *typeEncoding);
 - (instancetype)initWithProperty:(objc_property_t)property;
 @end
 
+
+/**
+ Class information for a class
+ */
 @interface YYClassInfo : NSObject
+@property (nonatomic, assign, readonly) Class cls; ///< class object
+@property (nullable, nonatomic, assign, readonly) Class superCls; ///< super class object
+@property (nullable, nonatomic, assign, readonly) Class metaCls;  ///< class's meta class object
+@property (nonatomic, readonly) BOOL isMeta; ///< whether this class is meta class
+@property (nonatomic, strong, readonly) NSString *name; ///< class name
+@property (nullable, nonatomic, strong, readonly) YYClassInfo *superClassInfo; ///< super class's class info
+@property (nullable, nonatomic, strong, readonly) NSDictionary<NSString *, YYClassIvarInfo *> *ivarInfos; ///< ivars
+@property (nullable, nonatomic, strong, readonly) NSDictionary<NSString *, YYClassMethodInfo *> *methodInfos; ///< methods
+@property (nullable, nonatomic, strong, readonly) NSDictionary<NSString *, YYClassPropertyInfo *> *propertyInfos; ///< properties
+
+/**
+ If the class is changed (for example: you add a method to this class with
+ 'class_addMethod()'), you should call this method to refresh the class info cache.
+ 
+ After called this method, `needUpdate` will returns `YES`, and you should call
+ 'classInfoWithClass' or 'classInfoWithClassName' to get the updated class info.
+ */
+- (void)setNeedUpdate;
+
+/**
+ If this method returns `YES`, you should stop using this instance and call
+ `classInfoWithClass` or `classInfoWithClassName` to get the updated class info.
+
+ @return Whether this class info need update
+ */
+- (BOOL)needUpdate;
+
+/**
+ Get the class info of a specified Class.
+
+ @discussion This method will cache the class info and super-class info
+ at the first access to the Class. This method is thread-safe.
+ 
+ @param cls A class
+ @return A class info, or nil if an error occurs.
+ */
++ (nullable instancetype)classInfoWithClass:(Class)cls;
+
+/**
+ Get the class info of a specified Class.
+ 
+ @discussion This method will cache the class info and super-class info
+ at the first access to the Class. This method is thread-safe.
+
+ @param className A class name
+ @return A class info, or nil if an error occurs.
+ */
++ (nullable instancetype)classInfoWithClassName:(NSString *)className;
 
 @end
 

@@ -90,9 +90,7 @@ YYEncodingType YYEncodingGetType(const char *typeEncoding) {
 @implementation YYClassIvarInfo
 
 - (instancetype)initWithIvar:(Ivar)ivar {
-    if (!ivar) {
-        return nil;
-    }
+    if (!ivar) return nil;
     self = [super init];
     _ivar = ivar;
     const char *name = ivar_getName(ivar);
@@ -113,9 +111,7 @@ YYEncodingType YYEncodingGetType(const char *typeEncoding) {
 @implementation YYClassMethodInfo
 
 - (instancetype)initWithMethod:(Method)method {
-    if (!method) {
-        return nil;
-    }
+    if (!method) return nil;
     self = [super init];
     _method = method;
     _sel = method_getName(method);
@@ -251,6 +247,113 @@ YYEncodingType YYEncodingGetType(const char *typeEncoding) {
 
 @end
 
-@implementation YYClassInfo
+@implementation YYClassInfo {
+    BOOL _needUpdate;
+}
+
+- (instancetype)initWithClass:(Class)cls {
+    if (!cls) return nil;
+    self = [super init];
+    _cls = cls;
+    _superCls = class_getSuperclass(cls);
+    _isMeta = class_isMetaClass(cls);
+    if (!_isMeta) {
+        _metaCls = objc_getMetaClass(class_getName(cls));
+    }
+    _name = NSStringFromClass(cls);
+    [self _update];
+    
+    _superClassInfo = [self.class classInfoWithClass:_superCls];
+    return self;
+}
+
+- (void)_update {
+    _ivarInfos = nil;
+    _methodInfos = nil;
+    _propertyInfos = nil;
+    
+    Class cls = self.cls;
+    unsigned int methodCount = 0;
+    Method *methods = class_copyMethodList(cls, &methodCount);
+    if (methods) {
+        NSMutableDictionary *methodInfos = [NSMutableDictionary new];
+        _methodInfos = methodInfos;
+        for (unsigned int i = 0; i < methodCount; i++) {
+            YYClassMethodInfo *info = [[YYClassMethodInfo alloc] initWithMethod:methods[i]];
+            if (info.name) methodInfos[info.name] = info;
+        }
+        free(methods);
+    }
+    unsigned int propertyCount = 0;
+    objc_property_t *properties = class_copyPropertyList(cls, &propertyCount);
+    if (properties) {
+        NSMutableDictionary *propertyInfos = [NSMutableDictionary new];
+        _propertyInfos = propertyInfos;
+        for (unsigned int i = 0; i < propertyCount; i++) {
+            YYClassPropertyInfo *info = [[YYClassPropertyInfo alloc] initWithProperty:properties[i]];
+            if (info.name) propertyInfos[info.name] = info;
+        }
+        free(properties);
+    }
+    
+    unsigned int ivarCount = 0;
+    Ivar *ivars = class_copyIvarList(cls, &ivarCount);
+    if (ivars) {
+        NSMutableDictionary *ivarInfos = [NSMutableDictionary new];
+        _ivarInfos = ivarInfos;
+        for (unsigned int i = 0; i < ivarCount; i++) {
+            YYClassIvarInfo *info = [[YYClassIvarInfo alloc] initWithIvar:ivars[i]];
+            if (info.name) ivarInfos[info.name] = info;
+        }
+        free(ivars);
+    }
+    
+    if (!_ivarInfos) _ivarInfos = @{};
+    if (!_methodInfos) _methodInfos = @{};
+    if (!_propertyInfos) _propertyInfos = @{};
+    
+    _needUpdate = NO;
+}
+
+- (void)setNeedUpdate {
+    _needUpdate = YES;
+}
+
+- (BOOL)needUpdate {
+    return _needUpdate;
+}
+
++ (instancetype)classInfoWithClass:(Class)cls {
+    if (!cls) return nil;
+    static CFMutableDictionaryRef classCache;
+    static CFMutableDictionaryRef metaCache;
+    static dispatch_once_t onceToken;
+    static dispatch_semaphore_t lock;
+    dispatch_once(&onceToken, ^{
+        classCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        metaCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        lock = dispatch_semaphore_create(1);
+    });
+    dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);
+    YYClassInfo *info = CFDictionaryGetValue(class_isMetaClass(cls) ? metaCache : classCache, (__bridge const void *)(cls));
+    if (info && info->_needUpdate) {
+        [info _update];
+    }
+    dispatch_semaphore_signal(lock);
+    if (!info) {
+        info = [[YYClassInfo alloc] initWithClass:cls];
+        if (info) {
+            dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);
+            CFDictionarySetValue(info.isMeta ? metaCache : classCache, (__bridge const void *)(cls), (__bridge const void *)(info));
+            dispatch_semaphore_signal(lock);
+        }
+    }
+    return info;
+}
+
++ (instancetype)classInfoWithClassName:(NSString *)className {
+    Class cls = NSClassFromString(className);
+    return [self classInfoWithClass:cls];
+}
 
 @end
