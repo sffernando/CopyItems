@@ -16,6 +16,7 @@
 		0A8CA8481DFE742A00AB8308 /* CPYYModelTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A8CA8471DFE742A00AB8308 /* CPYYModelTests.m */; };
 		0A8CA8561DFE74FB00AB8308 /* NSObject+YYModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A8CA8551DFE74FB00AB8308 /* NSObject+YYModel.m */; };
 		0A8CA8591DFE752000AB8308 /* YYClassInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A8CA8581DFE752000AB8308 /* YYClassInfo.m */; };
+		0AD371E31DFFE4A600E80D79 /* YYBook.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AD371E21DFFE4A600E80D79 /* YYBook.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,8 @@
 		0A8CA8551DFE74FB00AB8308 /* NSObject+YYModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+YYModel.m"; sourceTree = "<group>"; };
 		0A8CA8571DFE752000AB8308 /* YYClassInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYClassInfo.h; sourceTree = "<group>"; };
 		0A8CA8581DFE752000AB8308 /* YYClassInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYClassInfo.m; sourceTree = "<group>"; };
+		0AD371E11DFFE4A600E80D79 /* YYBook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYBook.h; sourceTree = "<group>"; };
+		0AD371E21DFFE4A600E80D79 /* YYBook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYBook.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +101,8 @@
 				0A8CA8391DFE742A00AB8308 /* Assets.xcassets */,
 				0A8CA83B1DFE742A00AB8308 /* LaunchScreen.storyboard */,
 				0A8CA83E1DFE742A00AB8308 /* Info.plist */,
+				0AD371E11DFFE4A600E80D79 /* YYBook.h */,
+				0AD371E21DFFE4A600E80D79 /* YYBook.m */,
 			);
 			path = CPYYModel;
 			sourceTree = "<group>";
@@ -234,6 +239,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AD371E31DFFE4A600E80D79 /* YYBook.m in Sources */,
 				0A8CA8351DFE742A00AB8308 /* ViewController.m in Sources */,
 				0A8CA8321DFE742A00AB8308 /* AppDelegate.m in Sources */,
 				0A8CA82F1DFE742A00AB8308 /* main.m in Sources */,
@@ -433,6 +439,7 @@
 				0A8CA84E1DFE742A00AB8308 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0A8CA84F1DFE742A00AB8308 /* Build configuration list for PBXNativeTarget "CPYYModelTests" */ = {
 			isa = XCConfigurationList;
@@ -441,6 +448,7 @@
 				0A8CA8511DFE742A00AB8308 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
