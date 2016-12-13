@@ -166,6 +166,60 @@ NS_ASSUME_NONNULL_BEGIN
  @return A string that describes the contents of the receiver.
  */
 - (NSString *)yy_modelDescription;
+
 @end
 
+
+
+/**
+ Provide some data-model method for NSArray.
+ */
+@interface NSArray (YYModel)
+
+/**
+ Creates and returns an array from a json-array.
+ This method is thread-safe.
+
+ @param cls  The instance's class in array.
+ @param json  A json array of `NSArray`, `NSString` or `NSData`.
+ Example: [{"name", "Mary"},{"name":"Joe"}]
+ 
+ @return A array, or nil if an error occurs.
+ */
++ (nullable NSArray *)yy_modelArrayWithClass:(Class)cls json:(id)json;
+
+@end
+
+
+
+/**
+ Provide some data-model method for NSDictionary.
+ */
+@interface NSDictionary (YYModel)
+
+/**
+ Creates and returns a dictionary from a json.
+ This method is thread-safe.
+
+ @param cls  The value instance's class in dictionary.
+ @param json  A json dictionary of `NSDictionary`, `NSString` or `NSData`.
+ Example: {"user1":{"name","Mary"}, "user2": {name:"Joe"}}
+ 
+ @return A dictionary, or nil if an error occurs.
+ */
++ (nullable NSDictionary *)yy_modelDictionaryWithClass:(Class)cls json:(id)json;
+@end
+
+
+
+/**
+ If the default model transform does not fit to your model class, implement one or
+ more method in this protocol to change the default key-value transform process.
+ There's no need to add '<YYModel>' to your class header.
+ */
+@protocol YYModel <NSObject>
+@optional
+
+
+@end
 NS_ASSUME_NONNULL_END
