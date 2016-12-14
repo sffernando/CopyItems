@@ -239,6 +239,77 @@ static force_inline NSDate *YYNSDateFromString(__unsafe_unretained NSString *str
     #undef kParserNum
 }
 
+/// Get the 'NSBlock' class.
+static force_inline Class YYNSBlockClass() {
+    static Class cls;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        void (^block)(void) = ^{};
+        cls = ((NSObject *)block).class;
+        while (class_getSuperclass(cls) != [NSObject class]) {
+            cls = class_getSuperclass(cls);
+        }
+    });
+    return cls; // current is "NSBlock"
+}
+
+
+
+/**
+ Get the ISO date formatter.
+ 
+ ISO8601 format example:
+ 2010-07-09T16:13:30+12:00
+ 2011-01-11T11:11:11+0000
+ 2011-01-26T19:06:43Z
+ 
+ length: 20/24/25
+ */
+static force_inline NSDateFormatter *YYISODateFormatter() {
+    static NSDateFormatter *formatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        formatter = [[NSDateFormatter alloc] init];
+        formatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+    });
+    return formatter;
+}
+
+/// Get the value with key paths from dictionary
+/// The dic should be NSDictionary, and the keyPath should not be nil.
+static force_inline id YYValueForKeyPath(__unsafe_unretained NSDictionary *dic, __unsafe_unretained NSArray *keyPaths) {
+    id value = nil;
+    for (NSUInteger i = 0, max = keyPaths.count; i < max; i++) {
+        value = dic[keyPaths[i]];
+        if (i + 1 < max) {
+            if ([value isKindOfClass:[NSDictionary class]]) {
+                dic = value;
+            } else {
+                return nil;
+            }
+        }
+    }
+    return value;
+}
+
+/// Get the value with multi key (or key path) from dictionary
+/// The dic should be NSDictionary
+static force_inline id YYValueForMultiKeys(__unsafe_unretained NSDictionary *dic, __unsafe_unretained NSArray *multiKeys) {
+    id value = nil;
+    for (NSString *key in multiKeys) {
+        if ([key isKindOfClass:[NSString class]]) {
+            value = dic[key];
+            if (value) break;
+        } else {
+            value = YYValueForKeyPath(dic, (NSArray *)key);
+            if (value) break;
+        }
+    }
+    return value;
+}
+
+
 
 @implementation NSObject (YYModel)
 
