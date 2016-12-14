@@ -443,6 +443,43 @@ static force_inline id YYValueForMultiKeys(__unsafe_unretained NSDictionary *dic
 }
 @end
 
+
+/// A class info in object model.
+//@interface _YYModelMeta : NSObject {
+//    @package
+//    YYClassInfo *_classInfo;
+//    /// Key:mapped key and key path, Value:_YYModelPropertyMeta.
+//    NSDictionary *_mapper;
+//    /// Array<_YYModelPropertyMeta>, all property meta of this model.
+//    NSArray *_allPropertyMetas;
+//    /// Array<_YYModelPropertyMeta>, property meta which is mapped to a key path.
+//    NSArray *_keyPathPropertyMetas;
+//    /// Array<_YYModelPropertyMeta>, property meta which is mapped to multi keys.
+//    NSArray *_multiKeysPropertyMetas;
+//    /// The number of mapped key (and key path), same to _mapper.count.
+//    NSUInteger _keyMappedCount;
+//    /// Model class type.
+//    YYEncodingNSType _nsType;
+//    
+//    BOOL _hasCustomWillTransformFromDictionary;
+//    BOOL _hasCustomTransformFromDictionary;
+//    BOOL _hasCustomTransformToDictionary;
+//    BOOL _hasCustomClassFromDictionary;
+//}
+//@end
+@interface _YYModelMeta : NSObject {
+    @package
+    YYClassInfo *_classInfo;
+    /// Key:mapped key and key path, Value:_YYModelPropertyMeta.
+    NSDictionary *_mapper;
+    /// Array<_YYModelPropertyMeta>, all property meta of this model.
+    NSArray *_allPropertyMetas;
+}
+
+@end
+@implementation _YYModelMeta
+@end
+
 @implementation NSObject (YYModel)
 
 @end

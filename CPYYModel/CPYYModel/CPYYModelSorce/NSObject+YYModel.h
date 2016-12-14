@@ -218,6 +218,37 @@ NS_ASSUME_NONNULL_BEGIN
  There's no need to add '<YYModel>' to your class header.
  */
 @protocol YYModel <NSObject>
+
+/**
+ map the custom object's properties as keys and json keys an value to dictionary and return
+
+ @return mapper
+ */
++ (nullable NSDictionary<NSString *, id> *)modelCustomPropertyMapper;
+
+/**
+ map the custom object's properties as keys and property's class as value and return
+
+ @return mapper
+ */
++ (nullable NSDictionary<NSString *, id> *)modelContainerPropertyGenericClass;
+
+//+ (nullable Class)modelCustomClassForDictionary:(NSDictionary *)dictionary;
++ (nullable Class)modelCustomClassForDictionary:(NSDictionary *)dictionary;
+
+//+ (nullable NSArray<NSString *> *)modelPropertyBlacklist;
++ (nullable NSArray<NSString *> *)modelPropertyBlacklist;
+
+//+ (nullable NSArray<NSString *> *)modelPropertyWhitelist;
++ (nullable NSArray<NSString *> *)modelPropertyWhitelist;
+
+//- (NSDictionary *)modelCustomWillTransformFromDictionary:(NSDictionary *)dic;
+- (NSDictionary *)modelCustomWillTransformFromDictionary:(NSDictionary *)dic;
+
+//- (BOOL)modelCustomTransformFromDictionary:(NSDictionary *)dic;
+- (BOOL)modelCustomTransformFromDictionary:(NSDictionary *)dic;
+
+- (BOOL)modelCustomTransformToDictionary:(NSMutableDictionary *)dic;
 @optional
 
 
