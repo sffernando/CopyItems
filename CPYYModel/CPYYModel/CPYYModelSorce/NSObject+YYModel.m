@@ -310,6 +310,138 @@ static force_inline id YYValueForMultiKeys(__unsafe_unretained NSDictionary *dic
 }
 
 
+/// A property info in object model.
+@interface _YYModelPropertyMeta : NSObject {
+    @package
+    NSString *_name;             ///< property's name
+    YYEncodingType _type;        ///< property's type
+    YYEncodingNSType _nsType;    ///< property's Foundation type
+    BOOL _isCNumber;             ///< is c number type
+    Class _cls;                  ///< property's class, or nil
+    Class _genericCls;           ///< container's generic class, or nil if there's no generic class
+    SEL _getter;                 ///< getter, or nil if the instances cannot respond
+    SEL _setter;                 ///< setter, or nil if the instances cannot respond
+    BOOL _isKVCCompatible;       ///< YES if it can access with key-value coding
+    BOOL _isStructAvailableForKeyedArchiver; ///< YES if the struct can encoded with keyed archiver/unarchiver
+    BOOL _hasCustomClassFromDictionary; ///< class/generic class implements +modelCustomClassForDictionary:
+    
+    /*
+     property->key:       _mappedToKey:key     _mappedToKeyPath:nil            _mappedToKeyArray:nil
+     property->keyPath:   _mappedToKey:keyPath _mappedToKeyPath:keyPath(array) _mappedToKeyArray:nil
+     property->keys:      _mappedToKey:keys[0] _mappedToKeyPath:nil/keyPath    _mappedToKeyArray:keys(array)
+     */
+    NSString *_mappedToKey;      ///< the key mapped to
+    NSArray *_mappedToKeyPath;   ///< the key path mapped to (nil if the name is not key path)
+    NSArray *_mappedToKeyArray;  ///< the key(NSString) or keyPath(NSArray) array (nil if not mapped to multiple keys)
+    YYClassPropertyInfo *_info;  ///< property's info
+    _YYModelPropertyMeta *_next; ///< next meta if there are multiple properties mapped to the same key.
+}
+@end
+
+@implementation _YYModelPropertyMeta
++ (instancetype)metaWithClassInfo:(YYClassInfo *)classInfo propertyInfo:(YYClassPropertyInfo *)propertyInfo generic:(Class)generic {
+    
+    // support pseudo generic class with protocol name
+    if (!generic && propertyInfo.protocols) {
+        for (NSString *protocol in propertyInfo.protocols) {
+            Class cls = objc_getClass(protocol.UTF8String);
+            if (cls) {
+                generic = cls;
+                break;
+            }
+        }
+    }
+    
+    _YYModelPropertyMeta *meta = [self new];
+    meta->_name = propertyInfo.name;
+    meta->_type = propertyInfo.type;
+    meta->_info = propertyInfo;
+    meta->_genericCls = generic;
+    
+    if ((meta->_type & YYEncodingTypeMask) == YYEncodingTypeObject) {
+        meta->_nsType = YYClassGetNSType(propertyInfo.cls);
+    } else {
+        meta->_isCNumber = YYEncodingTypeIsCNumber(meta->_type);
+    }
+    if ((meta->_type & YYEncodingTypeMask) == YYEncodingTypeStruct) {
+        /*
+         It seems that NSKeyedUnarchiver cannot decode NSValue except these structs:
+         */
+        static NSSet *types = nil;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            NSMutableSet *set = [NSMutableSet new];
+            // 32 bit
+            [set addObject:@"{CGSize=ff}"];
+            [set addObject:@"{CGPoint=ff}"];
+            [set addObject:@"{CGRect={CGPoint=ff}{CGSize=ff}}"];
+            [set addObject:@"{CGAffineTransform=ffffff}"];
+            [set addObject:@"{UIEdgeInsets=ffff}"];
+            [set addObject:@"{UIOffset=ff}"];
+            // 64 bit
+            [set addObject:@"{CGSize=dd}"];
+            [set addObject:@"{CGPoint=dd}"];
+            [set addObject:@"{CGRect={CGPoint=dd}{CGSize=dd}}"];
+            [set addObject:@"{CGAffineTransform=dddddd}"];
+            [set addObject:@"{UIEdgeInsets=dddd}"];
+            [set addObject:@"{UIOffset=dd}"];
+            types = set;
+        });
+        if ([types containsObject:propertyInfo.typeEncoding]) {
+            meta->_isStructAvailableForKeyedArchiver = YES;
+        }
+    }
+    meta->_cls = propertyInfo.cls;
+    
+    if (generic) {
+        meta->_hasCustomClassFromDictionary = [generic respondsToSelector:@selector(modelCustomClassForDictionary:)];
+    } else if (meta->_cls && meta->_nsType == YYEncodingTypeNSUnknown) {
+        meta->_hasCustomClassFromDictionary = [meta->_cls respondsToSelector:@selector(modelCustomClassForDictionary:)];
+    }
+    
+    if (propertyInfo.getter) {
+        if ([classInfo.cls instancesRespondToSelector:propertyInfo.getter]) {
+            meta->_getter = propertyInfo.getter;
+        }
+    }
+    if (propertyInfo.setter) {
+        if ([classInfo.cls instancesRespondToSelector:propertyInfo.setter]) {
+            meta->_setter = propertyInfo.setter;
+        }
+    }
+    
+    if (meta->_getter && meta->_setter) {
+        /*
+         KVC invalid type:
+         long double
+         pointer (such as SEL/CoreFoundation object)
+         */
+        switch (meta->_type & YYEncodingTypeMask) {
+            case YYEncodingTypeBool:
+            case YYEncodingTypeInt8:
+            case YYEncodingTypeUInt8:
+            case YYEncodingTypeInt16:
+            case YYEncodingTypeUInt16:
+            case YYEncodingTypeInt32:
+            case YYEncodingTypeUInt32:
+            case YYEncodingTypeInt64:
+            case YYEncodingTypeUInt64:
+            case YYEncodingTypeFloat:
+            case YYEncodingTypeDouble:
+            case YYEncodingTypeObject:
+            case YYEncodingTypeClass:
+            case YYEncodingTypeBlock:
+            case YYEncodingTypeStruct:
+            case YYEncodingTypeUnion: {
+                meta->_isKVCCompatible = YES;
+            } break;
+            default: break;
+        }
+    }
+    
+    return meta;
+}
+@end
 
 @implementation NSObject (YYModel)
 
