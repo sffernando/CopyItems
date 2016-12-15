@@ -445,28 +445,6 @@ static force_inline id YYValueForMultiKeys(__unsafe_unretained NSDictionary *dic
 
 
 /// A class info in object model.
-//@interface _YYModelMeta : NSObject {
-//    @package
-//    YYClassInfo *_classInfo;
-//    /// Key:mapped key and key path, Value:_YYModelPropertyMeta.
-//    NSDictionary *_mapper;
-//    /// Array<_YYModelPropertyMeta>, all property meta of this model.
-//    NSArray *_allPropertyMetas;
-//    /// Array<_YYModelPropertyMeta>, property meta which is mapped to a key path.
-//    NSArray *_keyPathPropertyMetas;
-//    /// Array<_YYModelPropertyMeta>, property meta which is mapped to multi keys.
-//    NSArray *_multiKeysPropertyMetas;
-//    /// The number of mapped key (and key path), same to _mapper.count.
-//    NSUInteger _keyMappedCount;
-//    /// Model class type.
-//    YYEncodingNSType _nsType;
-//    
-//    BOOL _hasCustomWillTransformFromDictionary;
-//    BOOL _hasCustomTransformFromDictionary;
-//    BOOL _hasCustomTransformToDictionary;
-//    BOOL _hasCustomClassFromDictionary;
-//}
-//@end
 @interface _YYModelMeta : NSObject {
     @package
     YYClassInfo *_classInfo;
@@ -474,10 +452,171 @@ static force_inline id YYValueForMultiKeys(__unsafe_unretained NSDictionary *dic
     NSDictionary *_mapper;
     /// Array<_YYModelPropertyMeta>, all property meta of this model.
     NSArray *_allPropertyMetas;
+    /// Array<_YYModelPropertyMeta>, property meta which is mapped to a key path.
+    NSArray *_keyPathPropertyMetas;
+    /// Array<_YYModelPropertyMeta>, property meta which is mapped to multi keys.
+    NSArray *_multiKeysPropertyMetas;
+    /// The number of mapped key (and key path), same to _mapper.count.
+    NSUInteger _keyMappedCount;
+    /// Model class type.
+    YYEncodingNSType _nsType;
+    
+    BOOL _hasCustomWillTransformFromDictionary;
+    BOOL _hasCustomTransformFromDictionary;
+    BOOL _hasCustomTransformToDictionary;
+    BOOL _hasCustomClassFromDictionary;
 }
-
 @end
+
 @implementation _YYModelMeta
+- (instancetype)initWithClass:(Class)cls {
+    YYClassInfo *classInfo = [YYClassInfo classInfoWithClass:cls];
+    if (!classInfo) return nil;
+    self = [super init];
+
+    // Get black list
+    NSSet *blacklist = nil;
+    if ([cls respondsToSelector:@selector(modelPropertyBlacklist)]) {
+        NSArray *properties = [(id<YYModel>)cls modelPropertyBlacklist];
+        if (properties) {
+            blacklist = [NSSet setWithArray:properties];
+        }
+    }
+    
+    // Get white list
+    NSSet *whitelist = nil;
+    if ([cls respondsToSelector:@selector(modelPropertyWhitelist)]) {
+        NSArray *properties = [(id<YYModel>)cls modelPropertyWhitelist];
+        if (properties) {
+            whitelist = [NSSet setWithArray:properties];
+        }
+    }
+
+    // Get container property's generic class
+    NSDictionary *genericMapper = nil;
+    if ([cls respondsToSelector:@selector(modelContainerPropertyGenericClass)]) {
+        genericMapper = [(id<YYModel>)cls modelContainerPropertyGenericClass];
+        if (genericMapper) {
+            NSMutableDictionary *tmp = [NSMutableDictionary new];
+            [genericMapper enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                if (![key isKindOfClass:[NSString class]]) return;
+                Class meta = object_getClass(obj);
+                if (!meta) return;
+                if (class_isMetaClass(meta)) {
+                    tmp[key] = obj;
+                } else if ([obj isKindOfClass:[NSString class]]) {
+                    Class cls = NSClassFromString(obj);
+                    if (cls) {
+                        tmp[key] = cls;
+                    }
+                }
+            }];
+            genericMapper = tmp;
+        }
+    }
+    
+    // Create all property metas.
+    NSMutableDictionary *allPropertyMetas = [NSMutableDictionary new];
+    YYClassInfo *curClassInfo = classInfo;
+    while (curClassInfo && curClassInfo.superCls != nil) { // recursive parse super class, but ignore root class (NSObject/NSProxy)
+        for (YYClassPropertyInfo *propertyInfo in curClassInfo.propertyInfos.allValues) {
+            if (!propertyInfo.name) continue;
+            if (blacklist && [blacklist containsObject:propertyInfo.name]) continue;
+            if (whitelist && ![whitelist containsObject:propertyInfo.name]) continue;
+            _YYModelPropertyMeta *meta = [_YYModelPropertyMeta metaWithClassInfo:classInfo
+                                                                    propertyInfo:propertyInfo
+                                                                         generic:genericMapper[propertyInfo.name]];
+            if (!meta || !meta->_name) continue;
+            if (!meta->_getter || !meta->_setter) continue;
+            if (allPropertyMetas[meta->_name]) continue;
+            allPropertyMetas[meta->_name] = meta;
+        }
+        curClassInfo = curClassInfo.superClassInfo;
+    }
+    if (allPropertyMetas.count) _allPropertyMetas = allPropertyMetas.allValues.copy;
+    
+    // Create mapper
+    NSMutableDictionary *mapper = [NSMutableDictionary new];
+    NSMutableArray *keyPathPropertyMetas = [NSMutableArray new];
+    NSMutableArray *multiKeysPropertyMetas = [NSMutableArray new];
+
+    if ([cls respondsToSelector:@selector(modelCustomPropertyMapper)]) {
+        NSDictionary *customMapper = [(id <YYModel>)cls modelCustomPropertyMapper];
+        [customMapper enumerateKeysAndObjectsUsingBlock:^(NSString *propertyName, NSString *mappedToKey, BOOL *stop) {
+            _YYModelPropertyMeta *propertyMeta = allPropertyMetas[propertyName];
+            if (!propertyMeta) return;
+            [allPropertyMetas removeObjectForKey:propertyName];
+            
+            if ([mappedToKey isKindOfClass:[NSString class]]) {
+                if (mappedToKey.length == 0) return;
+                
+                propertyMeta->_mappedToKey = mappedToKey;
+                NSArray *keyPath = [mappedToKey componentsSeparatedByString:@"."];
+                for (NSString *onePath in keyPath) {
+                    if (onePath.length == 0) {
+                        NSMutableArray *tmp = keyPath.mutableCopy;
+                        [tmp removeObject:@""];
+                        keyPath = tmp;
+                        break;
+                    }
+                }
+                if (keyPath.count > 1) {
+                    propertyMeta->_mappedToKeyPath = keyPath;
+                    [keyPathPropertyMetas addObject:propertyMeta];
+                }
+                propertyMeta->_next = mapper[mappedToKey] ?: nil;
+                mapper[mappedToKey] = propertyMeta;
+                
+            } else if ([mappedToKey isKindOfClass:[NSArray class]]) {
+                
+                NSMutableArray *mappedToKeyArray = [NSMutableArray new];
+                for (NSString *oneKey in ((NSArray *)mappedToKey)) {
+                    if (![oneKey isKindOfClass:[NSString class]]) continue;
+                    if (oneKey.length == 0) continue;
+                    
+                    NSArray *keyPath = [oneKey componentsSeparatedByString:@"."];
+                    if (keyPath.count > 1) {
+                        [mappedToKeyArray addObject:keyPath];
+                    } else {
+                        [mappedToKeyArray addObject:oneKey];
+                    }
+                    
+                    if (!propertyMeta->_mappedToKey) {
+                        propertyMeta->_mappedToKey = oneKey;
+                        propertyMeta->_mappedToKeyPath = keyPath.count > 1 ? keyPath : nil;
+                    }
+                }
+                if (!propertyMeta->_mappedToKey) return;
+                
+                propertyMeta->_mappedToKeyArray = mappedToKeyArray;
+                [multiKeysPropertyMetas addObject:propertyMeta];
+                
+                propertyMeta->_next = mapper[mappedToKey] ?: nil;
+                mapper[mappedToKey] = propertyMeta;
+            }
+        }];
+    }
+    
+    [allPropertyMetas enumerateKeysAndObjectsUsingBlock:^(NSString *name, _YYModelPropertyMeta *propertyMeta, BOOL *stop) {
+        propertyMeta->_mappedToKey = name;
+        propertyMeta->_next = mapper[name] ?: nil;
+        mapper[name] = propertyMeta;
+    }];
+    
+    if (mapper.count) _mapper = mapper;
+    if (keyPathPropertyMetas) _keyPathPropertyMetas = keyPathPropertyMetas;
+    if (multiKeysPropertyMetas) _multiKeysPropertyMetas = multiKeysPropertyMetas;
+    
+    _classInfo = classInfo;
+    _keyMappedCount = _allPropertyMetas.count;
+    _nsType = YYClassGetNSType(cls);
+    _hasCustomWillTransformFromDictionary = ([cls instancesRespondToSelector:@selector(modelCustomWillTransformFromDictionary:)]);
+    _hasCustomTransformFromDictionary = ([cls instancesRespondToSelector:@selector(modelCustomTransformFromDictionary:)]);
+    _hasCustomTransformToDictionary = ([cls instancesRespondToSelector:@selector(modelCustomTransformToDictionary:)]);
+    _hasCustomClassFromDictionary = ([cls respondsToSelector:@selector(modelCustomClassForDictionary:)]);
+    
+    return self;
+}
 @end
 
 @implementation NSObject (YYModel)
