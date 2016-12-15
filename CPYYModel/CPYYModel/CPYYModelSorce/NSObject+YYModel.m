@@ -617,7 +617,87 @@ static force_inline id YYValueForMultiKeys(__unsafe_unretained NSDictionary *dic
     
     return self;
 }
+
+/// Returns the cached model class meta
++ (instancetype)metaWithClass:(Class)cls {
+    if (!cls) return nil;
+    static CFMutableDictionaryRef cache;
+    static dispatch_once_t onceToken;
+    static dispatch_semaphore_t lock;
+    dispatch_once(&onceToken, ^{
+        cache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        lock = dispatch_semaphore_create(1);
+    });
+    dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);
+    _YYModelMeta *meta = CFDictionaryGetValue(cache, (__bridge const void *)(cls));
+    dispatch_semaphore_signal(lock);
+    if (!meta || meta->_classInfo.needUpdate) {
+        meta = [[_YYModelMeta alloc] initWithClass:cls];
+        if (meta) {
+            dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);
+            CFDictionarySetValue(cache, (__bridge const void *)(cls), (__bridge const void *)(meta));
+            dispatch_semaphore_signal(lock);
+        }
+    }
+    return meta;
+}
 @end
+
+
+/**
+ Get number from property.
+ @discussion Caller should hold strong reference to the parameters before this function returns.
+ @param model Should not be nil.
+ @param meta  Should not be nil, meta.isCNumber should be YES, meta.getter should not be nil.
+ @return A number object, or nil if failed.
+ */
+static force_inline NSNumber *ModelCreateNumberFromProperty(__unsafe_unretained id model, __unsafe_unretained _YYModelPropertyMeta *meta) {
+    switch (meta->_type & YYEncodingTypeMask) {
+        case YYEncodingTypeBool: {
+            return @(((bool (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeInt8: {
+            return @(((int8_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeUInt8: {
+            return @(((uint8_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeInt16: {
+            return @(((int16_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeUInt16: {
+            return @(((uint16_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeInt32: {
+            return @(((int32_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeUInt32: {
+            return @(((uint32_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeInt64: {
+            return @(((int64_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeUInt64: {
+            return @(((uint64_t (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter));
+        }
+        case YYEncodingTypeFloat: {
+            float num = ((float (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter);
+            if (isnan(num) || isinf(num)) return nil;
+            return @(num);
+        }
+        case YYEncodingTypeDouble: {
+            double num = ((double (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter);
+            if (isnan(num) || isinf(num)) return nil;
+            return @(num);
+        }
+        case YYEncodingTypeLongDouble: {
+            double num = ((long double (*)(id, SEL))(void *) objc_msgSend)((id)model, meta->_getter);
+            if (isnan(num) || isinf(num)) return nil;
+            return @(num);
+        }
+        default: return nil;
+    }
+}
 
 @implementation NSObject (YYModel)
 
