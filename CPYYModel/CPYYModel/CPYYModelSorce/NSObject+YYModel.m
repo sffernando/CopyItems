@@ -699,6 +699,73 @@ static force_inline NSNumber *ModelCreateNumberFromProperty(__unsafe_unretained 
     }
 }
 
+
+/**
+ Set number to property.
+ @discussion Caller should hold strong reference to the parameters before this function returns.
+ @param model Should not be nil.
+ @param num   Can be nil.
+ @param meta  Should not be nil, meta.isCNumber should be YES, meta.setter should not be nil.
+ */
+static force_inline void ModelSetNumberToProperty(__unsafe_unretained id model,
+                                                  __unsafe_unretained NSNumber *num,
+                                                  __unsafe_unretained _YYModelPropertyMeta *meta) {
+    switch (meta->_type & YYEncodingTypeMask) {
+        case YYEncodingTypeBool: {
+            ((void (*)(id, SEL, bool))(void *) objc_msgSend)((id)model, meta->_setter, num.boolValue);
+        } break;
+        case YYEncodingTypeInt8: {
+            ((void (*)(id, SEL, int8_t))(void *) objc_msgSend)((id)model, meta->_setter, (int8_t)num.charValue);
+        } break;
+        case YYEncodingTypeUInt8: {
+            ((void (*)(id, SEL, uint8_t))(void *) objc_msgSend)((id)model, meta->_setter, (uint8_t)num.unsignedCharValue);
+        } break;
+        case YYEncodingTypeInt16: {
+            ((void (*)(id, SEL, int16_t))(void *) objc_msgSend)((id)model, meta->_setter, (int16_t)num.shortValue);
+        } break;
+        case YYEncodingTypeUInt16: {
+            ((void (*)(id, SEL, uint16_t))(void *) objc_msgSend)((id)model, meta->_setter, (uint16_t)num.unsignedShortValue);
+        } break;
+        case YYEncodingTypeInt32: {
+            ((void (*)(id, SEL, int32_t))(void *) objc_msgSend)((id)model, meta->_setter, (int32_t)num.intValue);
+        }
+        case YYEncodingTypeUInt32: {
+            ((void (*)(id, SEL, uint32_t))(void *) objc_msgSend)((id)model, meta->_setter, (uint32_t)num.unsignedIntValue);
+        } break;
+        case YYEncodingTypeInt64: {
+            if ([num isKindOfClass:[NSDecimalNumber class]]) {
+                ((void (*)(id, SEL, int64_t))(void *) objc_msgSend)((id)model, meta->_setter, (int64_t)num.stringValue.longLongValue);
+            } else {
+                ((void (*)(id, SEL, uint64_t))(void *) objc_msgSend)((id)model, meta->_setter, (uint64_t)num.longLongValue);
+            }
+        } break;
+        case YYEncodingTypeUInt64: {
+            if ([num isKindOfClass:[NSDecimalNumber class]]) {
+                ((void (*)(id, SEL, int64_t))(void *) objc_msgSend)((id)model, meta->_setter, (int64_t)num.stringValue.longLongValue);
+            } else {
+                ((void (*)(id, SEL, uint64_t))(void *) objc_msgSend)((id)model, meta->_setter, (uint64_t)num.unsignedLongLongValue);
+            }
+        } break;
+        case YYEncodingTypeFloat: {
+            float f = num.floatValue;
+            if (isnan(f) || isinf(f)) f = 0;
+            ((void (*)(id, SEL, float))(void *) objc_msgSend)((id)model, meta->_setter, f);
+        } break;
+        case YYEncodingTypeDouble: {
+            double d = num.doubleValue;
+            if (isnan(d) || isinf(d)) d = 0;
+            ((void (*)(id, SEL, double))(void *) objc_msgSend)((id)model, meta->_setter, d);
+        } break;
+        case YYEncodingTypeLongDouble: {
+            long double d = num.doubleValue;
+            if (isnan(d) || isinf(d)) d = 0;
+            ((void (*)(id, SEL, long double))(void *) objc_msgSend)((id)model, meta->_setter, (long double)d);
+        } // break; commented for code coverage in next line
+        default: break;
+    }
+}
+
+
 @implementation NSObject (YYModel)
 
 @end
