@@ -1445,6 +1445,63 @@ static NSString *ModelDescription(NSObject *model) {
     return dic;
 }
 
+- (void)yy_modelEncodeWithCoder:(NSCoder *)aCoder {
+    if (!aCoder) return;
+    if (self == (id)kCFNull) {
+        [((id<NSCoding>)self)encodeWithCoder:aCoder];
+        return;
+    }
+    
+    _YYModelMeta *modelMeta = [_YYModelMeta metaWithClass:self.class];
+    if (modelMeta->_nsType) {
+        [((id<NSCoding>)self)encodeWithCoder:aCoder];
+        return;
+    }
+    
+    for (_YYModelPropertyMeta *propertyMeta in modelMeta->_allPropertyMetas) {
+        if (!propertyMeta->_getter) return;
+        
+        if (propertyMeta->_isCNumber) {
+            NSNumber *value = ModelCreateNumberFromProperty(self, propertyMeta);
+            if (value) [aCoder encodeObject:value forKey:propertyMeta->_name];
+        } else {
+            switch (propertyMeta->_type & YYEncodingTypeMask) {
+                case YYEncodingTypeObject: {
+                    id value = ((id (*)(id, SEL))(void *)objc_msgSend)((id)self, propertyMeta->_getter);
+                    if (value && (propertyMeta->_nsType || [value respondsToSelector:@selector(encodeWithCoder:)])) {
+                        if ([value isKindOfClass:[NSValue class]]) {
+                            if ([value isKindOfClass:[NSNumber class]]) {
+                                [aCoder encodeObject:value forKey:propertyMeta->_name];
+                            }
+                        } else {
+                            [aCoder encodeObject:value forKey:propertyMeta->_name];
+                        }
+                    }
+                } break;
+                case YYEncodingTypeSEL: {
+                    SEL value = ((SEL (*)(id, SEL))(void *)objc_msgSend)((id)self, propertyMeta->_getter);
+                    if (value) {
+                        NSString *str = NSStringFromSelector(value);
+                        [aCoder encodeObject:str forKey:propertyMeta->_name];
+                    }
+                } break;
+                case YYEncodingTypeStruct:
+                case YYEncodingTypeUnion: {
+                    if (propertyMeta->_isKVCCompatible && propertyMeta->_isStructAvailableForKeyedArchiver) {
+                        @try {
+                            NSValue *value = [self valueForKey:NSStringFromSelector(propertyMeta->_getter)];
+                            [aCoder encodeObject:value forKey:propertyMeta->_name];
+                        } @catch (NSException *exception) {}
+                    }
+                } break;
+                    
+                default:
+                    break;
+            }
+        }
+    }
+}
+
 - (id)yy_modelInitWithCoder:(NSCoder *)aDecoder {
     if (!aDecoder) return self;
     if (self == (id)kCFNull) return self;
@@ -1491,27 +1548,6 @@ static NSString *ModelDescription(NSObject *model) {
     }
     return self;
 }
-
-
-
-//- (id)yy_modelInitWithCoder:(NSCoder *)aDecoder {
-//                case YYEncodingTypeStruct:
-//                case YYEncodingTypeUnion: {
-//                    if (propertyMeta->_isKVCCompatible) {
-//                        @try {
-//                            NSValue *value = [aDecoder decodeObjectForKey:propertyMeta->_name];
-//                            if (value) [self setValue:value forKey:propertyMeta->_name];
-//                        } @catch (NSException *exception) {}
-//                    }
-//                } break;
-//                    
-//                default:
-//                    break;
-//            }
-//        }
-//    }
-//    return self;
-//}
 
 - (NSUInteger)yy_modelHash {
     if (self == (id)kCFNull) return [self hash];
