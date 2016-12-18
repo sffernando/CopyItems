@@ -1427,6 +1427,129 @@ static NSString *ModelDescription(NSObject *model) {
 
 @implementation NSObject (YYModel)
 
++ (NSDictionary *)_yy_dictionaryWithJSON:(id)json {
+    if (!json || json == (id)kCFNull) return nil;
+    NSDictionary *dic = nil;
+    NSData *jsonData = nil;
+    if ([json isKindOfClass:[NSDictionary class]]) {
+        dic = json;
+    } else if ([json isKindOfClass:[NSString class]]) {
+        jsonData = [(NSString *)json dataUsingEncoding : NSUTF8StringEncoding];
+    } else if ([json isKindOfClass:[NSData class]]) {
+        jsonData = json;
+    }
+    if (jsonData) {
+        dic = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:NULL];
+        if (![dic isKindOfClass:[NSDictionary class]]) dic = nil;
+    }
+    return dic;
+}
+
+- (id)yy_modelInitWithCoder:(NSCoder *)aDecoder {
+    if (!aDecoder) return self;
+    if (self == (id)kCFNull) return self;
+    _YYModelMeta *modelMeta = [_YYModelMeta metaWithClass:self.class];
+    if (modelMeta->_nsType) return self;
+    
+    for (_YYModelPropertyMeta *propertyMeta in modelMeta->_allPropertyMetas) {
+        if (!propertyMeta->_setter) continue;
+        
+        if (!propertyMeta->_isCNumber) {
+            NSNumber *value = [aDecoder decodeObjectForKey:propertyMeta->_name];
+            if ([value isKindOfClass:[NSNumber class]]) {
+                ModelSetNumberToProperty(self, value, propertyMeta);
+                [value class];
+            }
+        } else {
+            YYEncodingType type = propertyMeta->_type & YYEncodingTypeMask;
+            switch (type) {
+                case YYEncodingTypeObject: {
+                    id value = [aDecoder decodeObjectForKey:propertyMeta->_name];
+                    ((void (*)(id, SEL, id))(void *) objc_msgSend)((id)self, propertyMeta->_setter, value);
+                } break;
+                case YYEncodingTypeSEL: {
+                    NSString *str = [aDecoder decodeObjectForKey:propertyMeta->_name];
+                    if ([str isKindOfClass:[NSString class]]) {
+                        SEL sel = NSSelectorFromString(str);
+                        ((void (*)(id, SEL, SEL))(void *) objc_msgSend)((id)self, propertyMeta->_setter, sel);
+                    }
+                } break;
+                case YYEncodingTypeStruct:
+                case YYEncodingTypeUnion: {
+                    if (propertyMeta->_isKVCCompatible) {
+                        @try {
+                            NSValue *value = [aDecoder decodeObjectForKey:propertyMeta->_name];
+                            if (value) [self setValue:value forKey:propertyMeta->_name];
+                        } @catch (NSException *exception) {}
+                    }
+                } break;
+                    
+                default:
+                    break;
+            }
+        }
+    }
+    return self;
+}
+
+
+
+//- (id)yy_modelInitWithCoder:(NSCoder *)aDecoder {
+//                case YYEncodingTypeStruct:
+//                case YYEncodingTypeUnion: {
+//                    if (propertyMeta->_isKVCCompatible) {
+//                        @try {
+//                            NSValue *value = [aDecoder decodeObjectForKey:propertyMeta->_name];
+//                            if (value) [self setValue:value forKey:propertyMeta->_name];
+//                        } @catch (NSException *exception) {}
+//                    }
+//                } break;
+//                    
+//                default:
+//                    break;
+//            }
+//        }
+//    }
+//    return self;
+//}
+
+- (NSUInteger)yy_modelHash {
+    if (self == (id)kCFNull) return [self hash];
+    _YYModelMeta *modelMeta = [_YYModelMeta metaWithClass:self.class];
+    if (modelMeta->_nsType) return [self hash];
+    
+    NSUInteger value = 0;
+    NSUInteger count = 0;
+    for (_YYModelPropertyMeta *propertyMeta in modelMeta->_allPropertyMetas) {
+        if (!propertyMeta->_isKVCCompatible) continue;
+        value ^= [[self valueForKey:NSStringFromSelector(propertyMeta->_getter)] hash];
+        count++;
+    }
+    if (count == 0) value = (long)((__bridge void *)self);
+    return value;
+}
+
+- (BOOL)yy_modelIsEqual:(id)model {
+    if (self == model) return YES;
+    if (![model isMemberOfClass:self.class]) return NO;
+    _YYModelMeta *modelMeta = [_YYModelMeta metaWithClass:self.class];
+    if (modelMeta->_nsType) return [self isEqual:model];
+    if ([self hash] != [model hash]) return NO;
+    
+    for (_YYModelPropertyMeta *propertyMeta in modelMeta->_allPropertyMetas) {
+        if (!propertyMeta->_isKVCCompatible) continue;
+        id this = [self valueForKey:NSStringFromSelector(propertyMeta->_getter)];
+        id that = [model valueForKey:NSStringFromSelector(propertyMeta->_getter)];
+        if (this == that) continue;
+        if (this == nil || that == nil) return NO;
+        if (![this isEqual:that]) return NO;
+    }
+    return YES;
+}
+
+- (NSString *)yy_modelDescription {
+    return ModelDescription(self);
+}
 @end
 
 @implementation NSArray (YYModel)
