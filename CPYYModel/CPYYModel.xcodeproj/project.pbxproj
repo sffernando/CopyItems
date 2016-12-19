@@ -18,6 +18,7 @@
 		0A8CA8591DFE752000AB8308 /* YYClassInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A8CA8581DFE752000AB8308 /* YYClassInfo.m */; };
 		0AD371E31DFFE4A600E80D79 /* YYBook.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AD371E21DFFE4A600E80D79 /* YYBook.m */; };
 		ED2837941E0821F100A18FCC /* YYTestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = ED2837931E0821F100A18FCC /* YYTestHelper.m */; };
+		ED28379A1E08263000A18FCC /* YYTestNestModel.m in Sources */ = {isa = PBXBuildFile; fileRef = ED2837991E08263000A18FCC /* YYTestNestModel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		0AD371E21DFFE4A600E80D79 /* YYBook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYBook.m; sourceTree = "<group>"; };
 		ED2837921E0821F100A18FCC /* YYTestHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YYTestHelper.h; path = CPYYModelTests/YYTestHelper.h; sourceTree = SOURCE_ROOT; };
 		ED2837931E0821F100A18FCC /* YYTestHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YYTestHelper.m; path = CPYYModelTests/YYTestHelper.m; sourceTree = SOURCE_ROOT; };
+		ED2837991E08263000A18FCC /* YYTestNestModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYTestNestModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +126,7 @@
 			children = (
 				ED2837921E0821F100A18FCC /* YYTestHelper.h */,
 				ED2837931E0821F100A18FCC /* YYTestHelper.m */,
+				ED2837991E08263000A18FCC /* YYTestNestModel.m */,
 				0A8CA8471DFE742A00AB8308 /* CPYYModelTests.m */,
 				0A8CA8491DFE742A00AB8308 /* Info.plist */,
 			);
@@ -259,6 +262,7 @@
 			files = (
 				0A8CA8481DFE742A00AB8308 /* CPYYModelTests.m in Sources */,
 				ED2837941E0821F100A18FCC /* YYTestHelper.m in Sources */,
+				ED28379A1E08263000A18FCC /* YYTestNestModel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
