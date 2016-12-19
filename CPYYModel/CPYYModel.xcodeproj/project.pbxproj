@@ -17,6 +17,7 @@
 		0A8CA8561DFE74FB00AB8308 /* NSObject+YYModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A8CA8551DFE74FB00AB8308 /* NSObject+YYModel.m */; };
 		0A8CA8591DFE752000AB8308 /* YYClassInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A8CA8581DFE752000AB8308 /* YYClassInfo.m */; };
 		0AD371E31DFFE4A600E80D79 /* YYBook.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AD371E21DFFE4A600E80D79 /* YYBook.m */; };
+		ED2837941E0821F100A18FCC /* YYTestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = ED2837931E0821F100A18FCC /* YYTestHelper.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,8 @@
 		0A8CA8581DFE752000AB8308 /* YYClassInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYClassInfo.m; sourceTree = "<group>"; };
 		0AD371E11DFFE4A600E80D79 /* YYBook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYBook.h; sourceTree = "<group>"; };
 		0AD371E21DFFE4A600E80D79 /* YYBook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YYBook.m; sourceTree = "<group>"; };
+		ED2837921E0821F100A18FCC /* YYTestHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YYTestHelper.h; path = CPYYModelTests/YYTestHelper.h; sourceTree = SOURCE_ROOT; };
+		ED2837931E0821F100A18FCC /* YYTestHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YYTestHelper.m; path = CPYYModelTests/YYTestHelper.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +122,8 @@
 		0A8CA8461DFE742A00AB8308 /* CPYYModelTests */ = {
 			isa = PBXGroup;
 			children = (
+				ED2837921E0821F100A18FCC /* YYTestHelper.h */,
+				ED2837931E0821F100A18FCC /* YYTestHelper.m */,
 				0A8CA8471DFE742A00AB8308 /* CPYYModelTests.m */,
 				0A8CA8491DFE742A00AB8308 /* Info.plist */,
 			);
@@ -253,6 +258,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0A8CA8481DFE742A00AB8308 /* CPYYModelTests.m in Sources */,
+				ED2837941E0821F100A18FCC /* YYTestHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
