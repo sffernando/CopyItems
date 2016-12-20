@@ -17,6 +17,8 @@
 		0A20F7DE1DF92C3B003BD645 /* KingFisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A20F7DD1DF92C3B003BD645 /* KingFisher.swift */; };
 		0AE1F2581DF9A17900858A4D /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE1F2571DF9A17900858A4D /* Resource.swift */; };
 		0AE1F25A1DF9A7D700858A4D /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE1F2591DF9A7D700858A4D /* Image.swift */; };
+		ED2C58A81E097BD3001452C8 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2C58A71E097BD3001452C8 /* Box.swift */; };
+		ED2C58AA1E097CC9001452C8 /* ThreadHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2C58A91E097CC9001452C8 /* ThreadHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,8 @@
 		0A20F7DD1DF92C3B003BD645 /* KingFisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KingFisher.swift; sourceTree = "<group>"; };
 		0AE1F2571DF9A17900858A4D /* Resource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		0AE1F2591DF9A7D700858A4D /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
+		ED2C58A71E097BD3001452C8 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Box.swift; path = CPKingFirsher/Resource/Box.swift; sourceTree = SOURCE_ROOT; };
+		ED2C58A91E097CC9001452C8 /* ThreadHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ThreadHelper.swift; path = CPKingFirsher/Resource/ThreadHelper.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,6 +143,8 @@
 		0A20F7D51DF929E3003BD645 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				ED2C58A71E097BD3001452C8 /* Box.swift */,
+				ED2C58A91E097CC9001452C8 /* ThreadHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -256,7 +262,9 @@
 			files = (
 				0A20F7891DF90DEC003BD645 /* ViewController.swift in Sources */,
 				0AE1F2581DF9A17900858A4D /* Resource.swift in Sources */,
+				ED2C58AA1E097CC9001452C8 /* ThreadHelper.swift in Sources */,
 				0A20F7DE1DF92C3B003BD645 /* KingFisher.swift in Sources */,
+				ED2C58A81E097BD3001452C8 /* Box.swift in Sources */,
 				0A20F7871DF90DEC003BD645 /* AppDelegate.swift in Sources */,
 				0AE1F25A1DF9A7D700858A4D /* Image.swift in Sources */,
 			);
