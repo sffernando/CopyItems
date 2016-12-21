@@ -17,8 +17,9 @@
 		0A20F7DE1DF92C3B003BD645 /* KingFisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A20F7DD1DF92C3B003BD645 /* KingFisher.swift */; };
 		0AE1F2581DF9A17900858A4D /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE1F2571DF9A17900858A4D /* Resource.swift */; };
 		0AE1F25A1DF9A7D700858A4D /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE1F2591DF9A7D700858A4D /* Image.swift */; };
-		ED2C58A81E097BD3001452C8 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2C58A71E097BD3001452C8 /* Box.swift */; };
-		ED2C58AA1E097CC9001452C8 /* ThreadHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2C58A91E097CC9001452C8 /* ThreadHelper.swift */; };
+		ED395F5E1E0AB2D10041CD4C /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED395F5B1E0AB2D10041CD4C /* Box.swift */; };
+		ED395F5F1E0AB2D10041CD4C /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED395F5C1E0AB2D10041CD4C /* String+MD5.swift */; };
+		ED395F601E0AB2D10041CD4C /* ThreadHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED395F5D1E0AB2D10041CD4C /* ThreadHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,8 +48,9 @@
 		0A20F7DD1DF92C3B003BD645 /* KingFisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KingFisher.swift; sourceTree = "<group>"; };
 		0AE1F2571DF9A17900858A4D /* Resource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		0AE1F2591DF9A7D700858A4D /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
-		ED2C58A71E097BD3001452C8 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Box.swift; path = CPKingFirsher/Resource/Box.swift; sourceTree = SOURCE_ROOT; };
-		ED2C58A91E097CC9001452C8 /* ThreadHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ThreadHelper.swift; path = CPKingFirsher/Resource/ThreadHelper.swift; sourceTree = SOURCE_ROOT; };
+		ED395F5B1E0AB2D10041CD4C /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
+		ED395F5C1E0AB2D10041CD4C /* String+MD5.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
+		ED395F5D1E0AB2D10041CD4C /* ThreadHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,9 +115,9 @@
 		0A20F7D21DF929E3003BD645 /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				ED395F611E0AB2DC0041CD4C /* Extension */,
+				ED395F5A1E0AB2D10041CD4C /* Helpers */,
 				0A20F7D31DF929E3003BD645 /* Core */,
-				0A20F7D41DF929E3003BD645 /* Extension */,
-				0A20F7D51DF929E3003BD645 /* Helpers */,
 				0A20F7D61DF929E3003BD645 /* Views */,
 				0A20F7D71DF92A47003BD645 /* info.plist */,
 				0A20F7DB1DF92ADB003BD645 /* CPKingFisher.h */,
@@ -133,27 +135,28 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
-		0A20F7D41DF929E3003BD645 /* Extension */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extension;
-			sourceTree = "<group>";
-		};
-		0A20F7D51DF929E3003BD645 /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				ED2C58A71E097BD3001452C8 /* Box.swift */,
-				ED2C58A91E097CC9001452C8 /* ThreadHelper.swift */,
-			);
-			path = Helpers;
-			sourceTree = "<group>";
-		};
 		0A20F7D61DF929E3003BD645 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		ED395F5A1E0AB2D10041CD4C /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				ED395F5B1E0AB2D10041CD4C /* Box.swift */,
+				ED395F5C1E0AB2D10041CD4C /* String+MD5.swift */,
+				ED395F5D1E0AB2D10041CD4C /* ThreadHelper.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		ED395F611E0AB2DC0041CD4C /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -262,9 +265,10 @@
 			files = (
 				0A20F7891DF90DEC003BD645 /* ViewController.swift in Sources */,
 				0AE1F2581DF9A17900858A4D /* Resource.swift in Sources */,
-				ED2C58AA1E097CC9001452C8 /* ThreadHelper.swift in Sources */,
+				ED395F5F1E0AB2D10041CD4C /* String+MD5.swift in Sources */,
 				0A20F7DE1DF92C3B003BD645 /* KingFisher.swift in Sources */,
-				ED2C58A81E097BD3001452C8 /* Box.swift in Sources */,
+				ED395F5E1E0AB2D10041CD4C /* Box.swift in Sources */,
+				ED395F601E0AB2D10041CD4C /* ThreadHelper.swift in Sources */,
 				0A20F7871DF90DEC003BD645 /* AppDelegate.swift in Sources */,
 				0AE1F25A1DF9A7D700858A4D /* Image.swift in Sources */,
 			);
