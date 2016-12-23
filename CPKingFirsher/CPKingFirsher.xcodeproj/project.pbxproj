@@ -20,6 +20,7 @@
 		ED395F5E1E0AB2D10041CD4C /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED395F5B1E0AB2D10041CD4C /* Box.swift */; };
 		ED395F5F1E0AB2D10041CD4C /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED395F5C1E0AB2D10041CD4C /* String+MD5.swift */; };
 		ED395F601E0AB2D10041CD4C /* ThreadHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED395F5D1E0AB2D10041CD4C /* ThreadHelper.swift */; };
+		ED791B1D1E0D73C100C33DA9 /* RequestModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED791B1C1E0D73C100C33DA9 /* RequestModifier.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		ED395F5B1E0AB2D10041CD4C /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		ED395F5C1E0AB2D10041CD4C /* String+MD5.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
 		ED395F5D1E0AB2D10041CD4C /* ThreadHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadHelper.swift; sourceTree = "<group>"; };
+		ED791B1C1E0D73C100C33DA9 /* RequestModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestModifier.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +133,7 @@
 				0A20F7DD1DF92C3B003BD645 /* KingFisher.swift */,
 				0AE1F2571DF9A17900858A4D /* Resource.swift */,
 				0AE1F2591DF9A7D700858A4D /* Image.swift */,
+				ED791B1C1E0D73C100C33DA9 /* RequestModifier.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -269,6 +272,7 @@
 				0A20F7DE1DF92C3B003BD645 /* KingFisher.swift in Sources */,
 				ED395F5E1E0AB2D10041CD4C /* Box.swift in Sources */,
 				ED395F601E0AB2D10041CD4C /* ThreadHelper.swift in Sources */,
+				ED791B1D1E0D73C100C33DA9 /* RequestModifier.swift in Sources */,
 				0A20F7871DF90DEC003BD645 /* AppDelegate.swift in Sources */,
 				0AE1F25A1DF9A7D700858A4D /* Image.swift in Sources */,
 			);
